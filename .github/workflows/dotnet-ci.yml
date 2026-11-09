@@ -1,5 +1,5 @@
 
-name: .NET CI Pipeline
+name: .NET CI/CD Pipeline
 
 on:
   push:
@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   build:
@@ -33,3 +34,37 @@ jobs:
 
       - name: Build application
         run: dotnet build EmployeeManagement.Api/EmployeeManagement.Api.csproj --configuration Release --no-restore
+
+      - name: Publish application
+        run: dotnet publish EmployeeManagement.Api/EmployeeManagement.Api.csproj --configuration Release --output ./publish --no-build
+
+      - name: Upload deployment artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: webapp
+          path: ./publish
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download deployment artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: webapp
+          path: ./publish
+
+      - name: Azure Login using OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: employee-management-api-bwercuc6aqdsbwbw
+          package: ./publish
