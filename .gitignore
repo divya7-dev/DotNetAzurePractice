@@ -1,0 +1,21 @@
+
+# .NET build output
+**/bin/
+**/obj/
+
+# Published output and deployment packages
+**/publish/
+**/*.zip
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# macOS
+.DS_Store
+
+# Environment and secrets
+.env
+.env.*
+!*.example

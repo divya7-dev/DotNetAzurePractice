@@ -1,0 +1,35 @@
+
+name: .NET CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore EmployeeManagement.Api/EmployeeManagement.Api.csproj
+
+      - name: Build application
+        run: dotnet build EmployeeManagement.Api/EmployeeManagement.Api.csproj --configuration Release --no-restore
